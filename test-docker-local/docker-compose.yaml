@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  master:
+    image: ubuntu:22.04
+    container_name: k8s-master-1
+  worker-1:
+    image: ubuntu:22.04
+    container_name: k8s-worker-1
+  worker-2:
+    image: ubuntu:22.04
+    container_name: k8s-worker-2

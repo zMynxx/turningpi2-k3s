@@ -1,0 +1,7 @@
+---
+- hosts: local
+  connection: local
+  vars_files:
+    - '../vars/vault.yaml'
+  roles:
+    - ironicBadger.docker_compose_generator

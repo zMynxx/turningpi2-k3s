@@ -1,0 +1,27 @@
+- name: Fetch k3s installation script
+  ansible.builtin.uri:
+    url: https://get.k3s.io
+    return_content: yes
+  register: k3s_installer
+
+- name: Find master's public ip
+  ansible.builtin.uri:
+    url: http://ifconfig.me/ip
+    return_content: yes
+  register: response
+
+- name: Run k3s installer on the master node
+  ansible.builtin.shell:
+    cmd: sh -s - \
+      --write-kubeconfig-mode 644 \
+      --disable servicelb \
+      --token "{{ k3s_token }}" \
+      --node-ip "{{ response.content }}" \
+      --disable-cloud-controller \
+      --disable local-storage
+    stdin: "{{ k3s_installer.content }}"
+
+- name: Label a master node
+  ansible.builtin.shell:
+    cmd: kubectl label nodes {{ hostname }} kubernetes.io/role=master &&\
+      kubectl label nodes cube01 node-type=master

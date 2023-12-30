@@ -1,0 +1,5 @@
+- name: Find master's public ip
+  ansible.builtin.uri:
+    url: http://ifconfig.me/ip
+    return_content: yes
+  register: response

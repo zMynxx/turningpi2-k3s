@@ -1,0 +1,27 @@
+---
+- name: update all nodes and set hostnames
+
+  hosts: rk1
+
+  ## Important! These are crucial for the playbook to work
+  vars:
+    ansible_connection: local
+    ansible_python: "{{ ansible_playbook_python }}"
+
+  var_files:
+    - vars/vault.yml
+
+  ## Make sure homebrew is up to date
+  pre_tasks:
+    - name: update ubuntu
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: yes
+      changed_when: false
+
+    - name: set hostnames
+      ansible.builtin.hostname:
+        name: "{{ item }}"
+      with_items: "{{ hostnames }}"
+
+  tasks:
