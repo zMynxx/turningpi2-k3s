@@ -1,4 +1,7 @@
 ---
+ansible_connection: local
+ansible_python: "{{ ansible_playbook_python }}"
+docker_sock_path: "/tmp/remote_docker.sock"
 k3s_token: "zMynxx"
 hostnames:
   - "k3s-master-1"

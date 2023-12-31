@@ -1,12 +1,62 @@
 version: "3.9"
 
+networks:
+  ansible:
+    name: ansible
+
 services:
+  controller:
+    # image: jcpowermac/alpine-ansible-ssh
+    # container_name: ansible-controller
+    # stdin_open: true
+    # tty: true
+    # volumes:
+    #   - .:/ansible
+    # networks:
+    #   - ansible
+    build:
+      context: .
+      dockerfile: Dockerfile
+      tags:
+        - ubuntu:22.04-ansible
+    # image: ubuntu:22.04
+    container_name: controller
+    command: sleep infinity
+    volumes:
+      - .:/ansible
+      - ~/.ssh/ansible:/root/.ssh/ansible
+      - ~/.ssh/ansible.pub:/root/.ssh/ansible.pub
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - ansible
+    # command: apt-get update && apt-get install --yes ansible && sleep infinity
+    stdin_open: true
+    tty: true
   master:
-    image: ubuntu:22.04
-    container_name: k8s-master-1
-  worker-1:
-    image: ubuntu:22.04
-    container_name: k8s-worker-1
-  worker-2:
-    image: ubuntu:22.04
-    container_name: k8s-worker-2
+    build:
+      context: .
+      dockerfile: Dockerfile
+      tags:
+        - ubuntu:22.04-ansible
+    # image: ubuntu:22.04
+    container_name: k3s-master-1
+    command: sleep infinity
+    networks:
+      - ansible
+    # command: apt-get update && apt-get install --yes ansible && sleep infinity
+    stdin_open: true
+    tty: true
+  # worker-1:
+  #   image: ubuntu:22.04
+  #   container_name: k8s-worker-1
+  #   command: sleep infinity
+  #   # command: apt-get update && apt-get install --yes ansible && sleep infinity
+  #   # stdin_open: true
+  #   # tty: true
+  # worker-2:
+  #   image: ubuntu:22.04
+  #   container_name: k8s-worker-2
+  #   command: sleep infinity
+  # command: apt-get update && apt-get install --yes ansible && sleep infinity
+  # stdin_open: true
+  # tty: true

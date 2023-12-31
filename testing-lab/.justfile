@@ -16,6 +16,17 @@ default:
   @just --choose
 
 #################################
+###      Vagrant Commands     ###
+#################################
+up:
+    @echo "Starting vagrant..."
+    @vagrant up
+
+down:
+    @echo "Stopping vagrant..."
+    @vagrant destroy --force
+
+#################################
 ##      Playbook Commands     ###
 #################################
 playbookdir := "./playbooks/"
@@ -61,7 +72,6 @@ dencrypt:
     @echo "dencrypting..."
     @ansible-vault decrypt $vaultpath
 alias de := dencrypt
-
 
 ############################
 ##      SSH Commands     ###

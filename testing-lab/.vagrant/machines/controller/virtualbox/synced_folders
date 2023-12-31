@@ -1,0 +1,1 @@
+{"virtualbox":{"/home/vagrant":{"guestpath":"/home/vagrant","hostpath":"/Users/develeap/Desktop/Lior/turningpi2-k3s/testing-lab/ansible","disabled":false,"__vagrantfile":true},"/vagrant":{"guestpath":"/vagrant","hostpath":"/Users/develeap/Desktop/Lior/turningpi2-k3s/testing-lab","disabled":false,"__vagrantfile":true}}}
