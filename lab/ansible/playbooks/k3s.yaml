@@ -1,59 +1,29 @@
----
-- name: update all nodes and set hostnames
+# ---
+# - name: update all nodes and set hostnames
+#   hosts: '*'
 
-  hosts: containers
-  # remote_user: root
-
-  ## Important! These are crucial for the playbook to work
-  # vars:
-  #   ansible_connection: local
-  #   ansible_python: "{{ ansible_playbook_python }}"
-
-  vars:
-    - hostnames:
-      - k3s-master-1
-  # vars_files:
-  #   - ../vars/vault.yml
-
-  ## Make sure homebrew is up to date
-  pre_tasks:
-    # - name: whoami
-    #   become: true
-    #   ansible.builtin.shell: whoami
-    #   register: whoami
-    # - name: Create SSH tunnel for the unix docker socket
-    #   become: true
-    #   command: 
-    #     cmd: "ssh -fnNT -L {{ docker_sock_path }}:/var/run/docker.sock root@{{ hostname }}"
-    #   with_items:
-    #     - "{{ hostnames }}"
-    #   delegate_to: localhost
-    
-    # - name: Run a simple command (command)
-    #   become: true
-    #   community.docker.docker_container_exec:
-    #     user: root
-    #     container: "{{ hostname }}"
-    #     command: /bin/bash -c "whoami"
-    #   register: result
-    #   with_items:
-    #     - "{{ hostnames }}"
-      
-    # - name: Print version
-    #   debug:
-    #     msg: "{{ result.stdout }}"
-
-    - name: update ubuntu
-      # become: true
-      ansible.builtin.apt:
-        update_cache: yes
-        upgrade: yes
-        force_apt_get: yes
-      changed_when: false
-
-    # - name: set hostnames
-    #   ansible.builtin.hostname:
-    #     name: "{{ item }}"
-    #   with_items: "{{ hostnames }}"
+#   vars_files:
+#     - ../vars/vault.yaml
+  
+#   ## Make sure machines are up to date
+#   pre_tasks:
+#     - name: update ubuntu
+#       become: true
+#       become_method: sudo
+#       ansible.builtin.apt:
+#         name: "*"
+#         state: latest
 
   # tasks:
+  #   - name: Setup master node
+  #     include_tasks: tasks/k3s_master.yaml
+---
+- name: Setup Master Nodes
+  hosts: 'masters'
+
+  vars_files:
+    - ../vars/vault.yaml
+
+  tasks:
+    - name: Setup master node
+      include_tasks: tasks/k3s_master.yaml

@@ -45,7 +45,7 @@ alias i := install
 # Run the playbook command
 play *PLAYBOOK :
     @echo "playbooking..."
-    @ansible-playbook -b ./playbooks/{{ PLAYBOOK }} --verbose
+    @ansible-playbook --become ./playbooks/{{ PLAYBOOK }} --verbose
 alias p := play
 
 ######################################

@@ -1,0 +1,15 @@
+- name: Find master's public ip
+  ansible.builtin.uri:
+    url: https://get.k3s.io
+    return_content: yes
+  register: response
+
+- name: Run k3s installer on the worker node
+  ansible.builtin.shell:
+    cmd: K3S_URL=https://"{{ ansible_host }}"":6443 K3S_TOKEN="{{ k3s_token }}" sh -
+    stdin: "{{ response.content }}"
+
+- name: Label a worker node
+  ansible.builtin.shell:
+    cmd: kubectl label nodes {{ hostname }} kubernetes.io/role=worker &&\
+      kubectl label nodes {{ hostname }} node-type=worker

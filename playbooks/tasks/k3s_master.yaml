@@ -1,6 +1,5 @@
 - name: Fetch k3s installation script
   ansible.builtin.uri:
-    url: https://get.k3s.io
     return_content: yes
   register: k3s_installer
 
