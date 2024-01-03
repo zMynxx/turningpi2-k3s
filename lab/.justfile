@@ -22,6 +22,10 @@ up:
     @echo "Starting vagrant..."
     @vagrant up
 
+connect:
+    @echo "Connecting to Ansible Controller using vagrant..."
+    @vagrant ssh controller
+
 down:
     @echo "Stopping vagrant..."
     @vagrant destroy --force
