@@ -1,0 +1,23 @@
+#### Stage 1 ####
+- name: Pre-requisities
+  hosts: '*'
+  become: true
+  vars_files:
+  - ../vars/vault.yaml
+
+   ## Make sure machines are up to date
+  pre_tasks:
+   - name: update ubuntu
+     ansible.builtin.apt:
+       name: '*'
+       state: latest
+       update_cache: yes
+       cache_valid_time: 86400 
+  
+  tasks:
+  - name: Set timezones
+    include_tasks: tasks/set_timezone.yaml
+  - name: install policycoreutils
+    ansible.builtin.apt:
+      name: policycoreutils
+      state: latest

@@ -1,0 +1,4 @@
+- name: Set same timezone on every Server
+  become: true
+  community.general.timezone:
+    name: Asia/Jerusalem

@@ -1,0 +1,12 @@
+- name: Pre-requisites
+  import_playbook: playbooks/01-preq.yaml 
+- name: Setup Localhost As Admin
+  import_playbook: playbooks/02-setup.yaml 
+- name: Bootstrap 1st Master Node
+  import_playbook: playbooks/03-Bootstrap.yaml 
+- name: Join Additional Master Nodes
+  import_playbook: playbooks/04-join_masters.yaml 
+- name: Join Additional Worker Nodes
+  import_playbook: playbooks/05-join_workers.yaml 
+- name: Install MetalLB & Kube-VIP Provider
+  import_playbook: playbooks/06-extras.yaml 

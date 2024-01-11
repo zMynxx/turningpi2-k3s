@@ -1,29 +1,134 @@
-# ---
-# - name: update all nodes and set hostnames
-#   hosts: '*'
-
-#   vars_files:
-#     - ../vars/vault.yaml
-  
-#   ## Make sure machines are up to date
-#   pre_tasks:
-#     - name: update ubuntu
-#       become: true
-#       become_method: sudo
-#       ansible.builtin.apt:
-#         name: "*"
-#         state: latest
-
-  # tasks:
-  #   - name: Setup master node
-  #     include_tasks: tasks/k3s_master.yaml
 ---
-- name: Setup Master Nodes
-  hosts: 'masters'
+#### Stage 1 ####
+- name: Pre-requisities
+  hosts: '*'
+  vars_files:
+  - ../vars/vault.yaml
+
+   ## Make sure machines are up to date
+  pre_tasks:
+   - name: update ubuntu
+     become: true
+     ansible.builtin.apt:
+       name: '*'
+       state: latest
+       update_cache: yes
+       cache_valid_time: 86400 
+  
+  tasks:
+  - name: Set timezones
+    include_tasks: tasks/set_timezone.yaml
+  - name: install policycoreutils
+    become: true
+    ansible.builtin.apt:
+      name: policycoreutils
+      state: latest
+      force: yes
+  - name: Reboot the nodes
+    ansible.builtin.reboot:
+
+#### Stage 2 ####
+- name: Setup Controller Node
+  hosts: localhost
+  connection: local
 
   vars_files:
-    - ../vars/vault.yaml
+  - ../vars/vault.yaml
 
   tasks:
-    - name: Setup master node
-      include_tasks: tasks/k3s_master.yaml
+  - name: Setup controller - k3sup
+    include_tasks: tasks/install_k3sup.yaml
+  - name: Setup controller - kubectl
+    include_tasks: tasks/install_kubectl.yaml
+
+#### Stage 3 ####
+
+- name: Bootstrap master-01
+  hosts: localhost
+  connection: local
+
+  vars_files:
+  - ../vars/vault.yaml
+
+  tasks:
+  - name: Init cluster
+    ansible.builtin.command:
+      argv:
+        - /usr/local/bin/k3sup
+        - install
+        - --host 
+        - "{{ groups['masters'] | first }}"
+    ansible.builtin.command: /usr/local/bin/k3sup install --host "{{ groups['masters'] | first }}" --user "{{ user }}" --ssh-key $HOME/.ssh/{{ cert_name }} --tls-san "{{ vip }}" --cluster —-local-path=${}/.kube/config --merge --context "{{ context }}" --sudo --k3s-version "{{ k3s_version }}" --no-extras --k3s-extra-args='--flannel-iface {{ interface }} --node-ip 10.0.0.11 --node-taint node-role.kubernetes.io/master=true:NoSchedule' --print-command
+
+        - "{{ user }}"
+        - --ssh-key
+        - $HOME/.ssh/{{ cert_name }}
+        - --tls-san 
+        - "{{ vip }}"
+        - --cluster 
+        - --k3s-version
+        - "{{ k3s_version }}"
+        - --no-extras
+        - --k3s-extra-args=--flannel-iface {{ interface }} \
+                            --node-ip 10.0.0.11 \
+                            --node-taint node-role.kubernetes.io/master=true:NoSchedule
+        - --sudo
+        - —-local-path 
+        - $HOME/.kube/kubeconfig  
+        - --merge 
+        - --context
+        - "{{ context }}"
+        - --print-command
+
+  - name: Prep Kube-VIP
+    include_tasks: tasks/prep_kube_vip.yaml
+  
+  - name: Export kube-vip configuration to 1st master
+    ansible.posix.synchronize:
+      src: /tmp/kube-vip.yaml
+      dest: /var/lib/rancher/k3s/server/manifests/kube-vip.yaml
+      delegate_to: '{{ groups[masters] | first }}'
+
+#### Stage 4 ####
+
+# ---
+# - name: Join Additional Master Nodes
+#   hosts: localhost
+#   connection: local
+#
+#   vars_files:
+#   - ../vars/vault.yaml
+#
+#   tasks:
+#   - name: Add Master Nodes
+#     include_tasks: tasks/add_master.yaml
+#     loop: '{{ groups[masters][1:] }}'
+# ---
+# - name: Join Additional Worker Nodes
+#   hosts: localhost
+#   connection: local
+#
+#   vars_files:
+#   - ../vars/vault.yaml
+#
+#   tasks:
+#   - name: Add Master Nodes
+#     include_tasks: tasks/add_worker.yaml
+#     loop: '{{ groups[workers] }}'
+# ---
+# - name: Add Kube-VIP and MetalLB 
+#   hosts: localhost
+#   connection: local
+#
+#   vars_files:
+#   - ../vars/vault.yaml
+#
+#   tasks:
+#   - name: Add Kube-VIP Cloud Provider
+#     include_tasks: tasks/install_kube_vip.yaml
+#   - name: Add MetalLB
+#     include_tasks: tasks/install_metal_lb.yaml
+#   - name: Add IPAddressPool
+#     include_tasks: tasks/install_ipaddresspool.yaml
+#   - name: Add Layer2Advertise
+#     include_tasks: tasks/install_l2_advertise.yaml

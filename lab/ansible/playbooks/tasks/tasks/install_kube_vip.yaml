@@ -1,0 +1,14 @@
+- name: Fetch kube-vip Could Provider manifest
+  ansible.builtin.get_url: 
+    url: https://raw.githubusercontent.com/kube-vip/kube-vip-cloud-provider/main/manifest/kube-vip-cloud-controller.yaml
+    dest: /tmp/kube-vip-cloud-controller.yaml
+
+- name: Apply RBAC manifests 
+  kubernetes.core.k8s:
+    state: present
+    src: /tmp/kube-vip-cloud-controller.yaml
+
+- name: Remove manifests
+  file: 
+    path: /tmp/kube-vip-cloud-controller.yaml
+    state: absent

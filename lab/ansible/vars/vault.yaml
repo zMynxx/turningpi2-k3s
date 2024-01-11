@@ -1,2 +1,22 @@
 ---
-k3s_token: "zMynxx"
+k3s_token: zMynxx
+k3s_version: v1.29.0+k3s1
+kube_vip_version: v0.6.3
+
+# User of remote machines
+user: vagrant
+
+# Interface used on remotes
+interface: eth0
+
+# Set the virtual IP address (VIP)
+vip: 192.168.3.50
+
+#Loadbalancer IP range
+lb_range: 192.168.3.60-192.168.3.80
+
+#ssh certificate name variable
+cert_name: ansible
+
+# kubeconfig context
+context: k3s-ha

@@ -1,0 +1,17 @@
+## IP Address Pool Setup for MetalLB
+
+- name: Copy manifest template to /tmp 
+  ansible.builtin.shell: cp $HOME/ansible/ip-address-pool.yaml /tmp/ip-address-pool.yaml
+
+- name: Fill variables in ip-address-pool.yaml
+  shell: sed -i 's/$name/{{ name }}/g; s/$lbrange/{{ lb_range }}/g' /tmp/ip-address-pool.yaml
+
+- name: Apply RBAC manifests 
+  kubernetes.core.k8s:
+    state: present
+    src: /tmp/ip-address-pool.yaml 
+
+- name: Remove /tmp/ip-address-pool.yaml
+  file: 
+    path: /tmp/ip-address-pool.yaml 
+    state: absent

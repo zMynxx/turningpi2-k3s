@@ -1,5 +1,5 @@
 - name: Check for k3s command
-  command: command -v k3s >/dev/null 2>&1
+  command: command -v k3s 
   register: installed
   no_log: false
   ignore_errors: yes
@@ -8,30 +8,52 @@
   ansible.builtin.uri: 
     url: https://get.k3sup.dev
     dest: /tmp/install.sh
-    mode: 'u+rwx'
+    mode: "u+rwx"
   when: installed.rc != 0
   register: download
 
-- name: Check for k3s command
-  command: command -v k3s >/dev/null 2>&1
+- name: Execute the k3s install script
+  become: true
+  shell: /tmp/install.sh
+
+- name: Remove the install.sh
+  file: 
+    path: /tmp/install.sh 
+    state: absent
+
+- name: Sudo Install k3sup /usr/local/bin
+  command: sudo install $HOME/ansible/k3sup /usr/local/bin/k3sup 
+
+- name: Check for kubectl command
+  command: command -v kubectl 
   register: installed
   no_log: false
   ignore_errors: yes
 
-- name: Fetch k3s installation script
+- name: Fetch kubectl latest stable version
   ansible.builtin.uri: 
-    url: https://get.k3sup.dev
-    dest: /tmp/install.sh
-    mode: 'u+rwx'
-  when: installed.rc != 0
-  register: download
-
-- name: Find master's public ip
-  ansible.builtin.uri:
-    url: http://ifconfig.me/ip
+    url: https://dl.k8s.io/release/stable.txt
     return_content: yes
-  register: response
+    follow_redirects: yes
+  when: installed.rc != 0
+  register: version
+- debug:
+    var: version.content
 
+- name: Fetch kubectl installation script
+  ansible.builtin.uri: 
+    url: 'https://dl.k8s.io/release/{{ version.content }}/bin/linux/amd64/kubectl'
+    dest: /tmp/kubectl
+  when: installed.rc != 0
+  register: download
+
+- name: Sudo Install kubectl /usr/local/bin
+  command: sudo install --owner root --group root --mode 0755 /tmp/kubectl /usr/local/bin/kubectl 
+
+- name: Remove /tmp/kubectl
+  file: 
+    path: /tmp/kubectl 
+    state: absent
 # - name: Installing Zsh
 #   become: true
 #   ansible.builtin.apt: 

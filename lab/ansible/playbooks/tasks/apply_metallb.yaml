@@ -1,0 +1,30 @@
+- name: Fetch latet MetalLB release
+  ansible.builtin.shell: curl -I https://github.com/metallb/metallb/releases/latest | awk -F '/' '/^location/ {print  substr($NF, 1, length($NF)-1)}'
+  register: latest
+
+# - name: Create MetalLB namespace
+#   kubernetes.core.k8s:
+#     definition:
+#       apiVersion: v1
+#       kind: Namespace
+#       metadata:
+#         name: metallb
+#       spec: {}
+#       status: {}
+
+- name: Fetch MetalLB latest config manifest
+  ansible.builtin.get_url: 
+    url: https://raw.githubusercontent.com/metallb/metallb/{{ latest.content }}/config/manifest/metallb-native.yaml
+    dest: /tmp/metallb-native.yaml
+
+- name: Apply RBAC manifests 
+  kubernetes.core.k8s:
+    state: present
+    src: /tmp/metallb-native.yaml
+
+- name: Remove manifests
+  file: 
+    path: /tmp/metallb-native.yaml
+    state: absent
+
+

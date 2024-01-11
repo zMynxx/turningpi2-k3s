@@ -1,0 +1,46 @@
+#### Stage 3 ####
+- name: Bootstrap master-01
+  hosts: localhost
+  connection: local
+
+  vars_files:
+  - ../vars/vault.yaml
+
+  tasks:
+  - name: Init cluster
+    ansible.builtin.shell: |
+      /usr/local/bin/k3sup install \
+      --cluster \
+      --ip {{ }}
+      --host {{ groups['masters'] | first }} \
+      --user {{ user }} \
+      --ssh-key ~/.ssh/{{ cert_name }} \
+      --k3s-channel stable \
+      --k3s-version {{ k3s_version }} \
+      --no-extras \
+      --k3s-extra-args='--flannel-iface {{ interface }} --bind-address {{ node_ip }} --advertise-address {{ node_ip }} --node-ip {{ node_ip }} --node-external-ip $(curl ifconfig.me/ip) --node-ip {{ node_ip }} --node-taint node-role.kubernetes.io/master=true:NoSchedule' \
+      --tls-san {{ vip }} \
+      —-local-path ~/.kube/config \
+      --context {{ context }} \
+      --sudo \
+      --print-command
+    vars:
+      node_ip: "{{ hostvars[groups['masters'][0]].ansible_host }}"
+
+  - name: Place kubeconfig file
+    ansible.builtin.shell: mv kubeconfig $HOME/.kube/config;
+
+  - name: Prep Kube-VIP
+    include_tasks: tasks/prep_kube_vip.yaml
+  
+- hosts: "{{ groups['masters'] | first }}"
+  become: true
+  tasks:
+  - name: Creates directory
+    ansible.builtin.file:
+      path: /var/lib/rancher/k3s/server/manifests
+      state: directory
+  - name: Export kube-vip configuration to 1st master
+    ansible.builtin.copy:
+      src: /tmp/kube-vip.yaml
+      dest: /var/lib/rancher/k3s/server/manifests/kube-vip.yaml

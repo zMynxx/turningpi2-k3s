@@ -1,0 +1,13 @@
+#### Stage 2 ####
+- name: Setup Controller Node
+  hosts: localhost
+  connection: local
+
+  vars_files:
+  - ../vars/vault.yaml
+
+  tasks:
+  - name: Setup controller - k3sup
+    include_tasks: tasks/install_k3sup.yaml
+  - name: Setup controller - kubectl
+    include_tasks: tasks/install_kubectl.yaml

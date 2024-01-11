@@ -1,0 +1,30 @@
+
+  ## Kube Virtual IP Setups
+  - name: Fetch RBAC manifests for Kube-VIP
+    ansible.builtin.get_url:
+      url: https://kube-vip.io/manifests/rbac.yaml
+      dest: /tmp/rbac.yaml
+      mode: '0664'
+
+  - name: Ansible Kubernetes Pre-requisites
+    pip:
+      name:
+        - openshift
+        - pyyaml
+        - kubernetes 
+
+  - name: Apply RBAC manifests 
+    kubernetes.core.k8s:
+      state: present
+      src: /tmp/rbac.yaml 
+
+  - name: Remove /tmp/rbac.yaml
+    file: 
+      path: /tmp/rbac.yaml 
+      state: absent
+
+  - name: Copy kube-vip template to /tmp 
+    ansible.builtin.shell: cp $HOME/ansible/kube-vip.yaml /tmp/kube-vip.yaml
+
+  - name: Fill variables in kube-vip.yaml
+    shell: sed -i 's/$interface/{{ interface }}/g; s/$vip/{{ vip }}/g; s/$kvversions/{{ kube_vip_version }}/g' /tmp/kube-vip.yaml

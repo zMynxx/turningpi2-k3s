@@ -1,0 +1,34 @@
+- name: Check for kubectl command
+  command: which kubectl 
+  register: installed
+  no_log: yes
+  ignore_errors: yes
+
+- name: Fetch kubectl latest stable version
+  ansible.builtin.uri: 
+    url: https://dl.k8s.io/release/stable.txt
+    return_content: yes
+    follow_redirects: yes
+  when: installed.rc != 0
+  register: version
+
+- name: Fetch kubectl installation script
+  ansible.builtin.get_url: 
+    url: 'https://dl.k8s.io/release/{{ version.content }}/bin/linux/amd64/kubectl'
+    dest: /tmp/kubectl
+  when: installed.rc != 0
+
+- name: Sudo Install kubectl /usr/local/bin
+  command: sudo install --owner root --group root --mode 0755 /tmp/kubectl /usr/local/bin/kubectl 
+  when: installed.rc != 0
+
+- name: Remove /tmp/kubectl
+  file: 
+    path: /tmp/kubectl 
+    state: absent
+  when: installed.rc != 0
+
+- name: mkdir ~/.kube
+  file:
+    path: $HOME/.kube
+    state: directory

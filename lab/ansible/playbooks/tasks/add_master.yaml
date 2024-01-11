@@ -1,0 +1,12 @@
+- name: Join Master Node
+  ansible.builtin.shell:
+    /usr/local/bin/k3sup join \
+    --host {{ host }} \
+    --user {{ user }} \
+    --sudo \
+    --k3s-version {{ k3s_version }} \
+    --server \
+    --server-user {{ user }} \  
+    --server-ip {{ server_ip }} \
+    --ssh-key $HOME/.ssh/{{ cert_name }} \
+    --k3s-extra-args "--flannel-iface {{ interface }} --node-ip {{ node_ip }} --node-taint node-role.kubernetes.io/master=true:NoSchedule"

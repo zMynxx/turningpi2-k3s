@@ -1,0 +1,19 @@
+#### Stage 06 ####
+- name: Add Kube-VIP and MetalLB 
+  hosts: localhost
+  connection: local
+
+  vars_files:
+  - ../vars/vault.yaml
+
+  tasks:
+  - name: Add Kube-VIP Cloud Provider
+    include_tasks: tasks/install_kube_vip.yaml
+  - name: Add MetalLB
+    include_tasks: tasks/apply_metal_lb.yaml
+  - name: Add IPAddressPool
+    include_tasks: tasks/apply_ipaddresspool.yaml
+  - name: Install Helm
+    include_tasks: tasks/install_helm.yaml
+  # - name: Add Layer2Advertise
+  #   include_tasks: tasks/install_l2_advertise.yaml

@@ -1,0 +1,16 @@
+#### Stage 4 ####
+- name: Join Additional Master Nodes
+  hosts: localhost
+  connection: local
+
+  vars_files:
+  - ../vars/vault.yaml
+
+  tasks:
+  - name: Add Master Nodes
+    include_tasks: tasks/add_master.yaml
+    with_items: "{{ groups['masters'][0:] }}"
+    vars:
+      host: "{{ item }}"
+      node_ip: "{{ hostvars[item].ansible_host }}"
+      server_ip: "{{ hostvars[ groups['masters'][0] ].ansible_host }}"

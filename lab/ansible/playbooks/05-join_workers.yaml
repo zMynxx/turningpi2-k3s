@@ -1,0 +1,16 @@
+#### Stage 5 ####
+- name: Join Additional Worker Nodes
+  hosts: localhost
+  connection: local
+
+  vars_files:
+  - ../vars/vault.yaml
+
+  tasks:
+  - name: Add Worker Nodes
+    include_tasks: tasks/add_worker.yaml
+    with_items: "{{ groups['workers'] }}"
+    vars:
+      host: "{{ item }}"
+      node_ip: "{{ hostvars[item].ansible_host }}"
+      server_ip: "{{ hostvars[ groups['masters'][0] ].ansible_host }}"
