@@ -4,3 +4,6 @@
 [submodule "rke2-ansible"]
 	path = rke2-ansible
 	url = https://github.com/rancherfederal/rke2-ansible.git
+[submodule "router/proxmox-ve"]
+	path = router/proxmox-ve
+	url = https://github.com/rgl/proxmox-ve.git
